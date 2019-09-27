@@ -57,6 +57,7 @@ def tinyMazeSearch(problem):
     s = Directions.SOUTH
     w = Directions.WEST
     return  [s,s,w,s,w,w,s,w]
+            
 
 def depthFirstSearch(problem):
     """
@@ -73,14 +74,70 @@ def depthFirstSearch(problem):
     print("Start's successors:", problem.getSuccessors(problem.getStartState()))
     """
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    
+    state = problem.getStartState()
+    
+    stack = util.Stack()
+    stack.push(state)
+
+    visited = set(state)
+    parent = dict()
+
+    while not stack.isEmpty():
+        s = stack.pop()
+        for next_state in problem.getSuccessors(s):
+            
+            if next_state[0] not in visited:
+                stack.push(next_state[0])
+                visited.add(next_state[0])
+                parent[next_state[0]] = (s, next_state[1])
+
+                if problem.isGoalState(next_state[0]):
+                    direction = []
+                    goal = next_state[0]
+                    while parent[goal][0] is not state:
+                        direction.append(parent[goal][1])
+                        
+                        goal = parent[goal][0]
+
+                    direction.append(parent[goal][1])
+                    # print(direction[::-1])
+                    return direction[::-1]
+    
 
 def breadthFirstSearch(problem):
     """
     Search the shallowest nodes in the search tree first.
     """
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    state = problem.getStartState()
+    
+    queue = util.Queue()
+    queue.push(state)
+
+    visited = set(state)
+    parent = dict()
+
+    while not queue.isEmpty():
+        s = queue.pop()
+        for next_state in problem.getSuccessors(s):
+            
+            if next_state[0] not in visited:
+                queue.push(next_state[0])
+                visited.add(next_state[0])
+                parent[next_state[0]] = (s, next_state[1])
+
+                if problem.isGoalState(next_state[0]):
+                    direction = []
+                    goal = next_state[0]
+                    while parent[goal][0] is not state:
+                        direction.append(parent[goal][1])
+                        
+                        goal = parent[goal][0]
+
+                    direction.append(parent[goal][1])
+                    # print(direction[::-1])
+                    return direction[::-1]
 
 def uniformCostSearch(problem):
     "Search the node of least total cost first. "
