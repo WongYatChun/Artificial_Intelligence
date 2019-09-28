@@ -82,7 +82,7 @@ def depthFirstSearch(problem):
 
     visited = set(state)
     parent = dict()
-
+    goal = None
     while not stack.isEmpty():
         s = stack.pop()
         for next_state in problem.getSuccessors(s):
@@ -91,18 +91,34 @@ def depthFirstSearch(problem):
                 stack.push(next_state[0])
                 visited.add(next_state[0])
                 parent[next_state[0]] = (s, next_state[1])
-
                 if problem.isGoalState(next_state[0]):
-                    direction = []
                     goal = next_state[0]
-                    while parent[goal][0] is not state:
-                        direction.append(parent[goal][1])
-                        
-                        goal = parent[goal][0]
 
-                    direction.append(parent[goal][1])
-                    # print(direction[::-1])
-                    return direction[::-1]
+                # if problem.isGoalState(next_state[0]):
+                #     direction = []
+                #     goal = next_state[0]
+                #     while parent[goal][0] is not state:
+                #         direction.append(parent[goal][1])
+                        
+                #         goal = parent[goal][0]
+
+                #     direction.append(parent[goal][1])
+                #     # print(direction[::-1])
+                #     return direction[::-1]
+
+    
+    direction = []
+    
+    while parent[goal][0] is not state:
+        direction.append(parent[goal][1])
+        
+        goal = parent[goal][0]
+
+    direction.append(parent[goal][1])
+    # print(direction[::-1])
+    return direction[::-1]
+
+        
     
 
 def breadthFirstSearch(problem):
