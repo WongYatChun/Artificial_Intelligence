@@ -35,6 +35,12 @@ class SolveEightQueens:
         """
         newBoard = board
         i = 0 
+        iter_allowance = 20
+        restart = 0
+        restart_allowance = 3
+
+        
+
         while True:
             if verbose:
                 print("iteration %d" % i)
@@ -42,10 +48,21 @@ class SolveEightQueens:
                 print("# attacks: %s" % str(newBoard.getNumberOfAttacks()))
                 print(newBoard.getCostBoard().toString(True))
             currentNumberOfAttacks = newBoard.getNumberOfAttacks()
+            
+            
+            if currentNumberOfAttacks == 0 and restart > restart_allowance:
+                return newBoard
             (newBoard, newNumberOfAttacks, newRow, newCol) = newBoard.getBetterBoard()
+
             i += 1
-            if currentNumberOfAttacks <= newNumberOfAttacks:
-                break
+            if currentNumberOfAttacks <= newNumberOfAttacks and i > iter_allowance:
+                
+                i = 0
+                newBoard = Board(squareArray = [[]])
+                
+                restart += 1
+                
+                
         return newBoard
 
 class Board:
@@ -104,7 +121,40 @@ class Board:
             return (betterBoard, minNumOfAttack, newRow, newCol)
         The datatype of minNumOfAttack, newRow and newCol should be int
         """
-        util.raiseNotDefined()
+
+        costBoard = self.getCostBoard()
+        
+
+        THRES = 9999
+        minNumOfAttack = THRES
+
+        oldRow = None
+        oldCol = None
+        newRow = None
+        newCol = None
+
+        for r in range(8):
+            for c in range(8):
+                if self.squareArray[r][c] == 1:
+                    for rr in range(8):
+                        if rr != r:
+                            if minNumOfAttack > costBoard.squareArray[rr][c]:
+                                oldRow, oldCol = r, c
+                                newRow, newCol = rr, c 
+                                minNumOfAttack = costBoard.squareArray[rr][c]
+
+        if minNumOfAttack == THRES:
+            return (self, self.getNumberOfAttacks(), newRow, newCol)
+                                
+
+        betterBoard = copy.deepcopy(self)
+        betterBoard.squareArray[oldRow][oldCol] = 0
+        betterBoard.squareArray[newRow][newCol] = 1
+
+        return (betterBoard, minNumOfAttack, newRow, newCol)
+                            
+        
+        
 
     def getNumberOfAttacks(self):
         """
@@ -112,7 +162,28 @@ class Board:
         This function should return the number of attacks of the current board
         The datatype of the return value should be int
         """
-        util.raiseNotDefined()
+        N = len(self.squareArray)
+        row_array = [0 for i in range(N)]
+        col_array = [0 for i in range(N)]
+        diag1_array = [0 for i in range(2 * N)]
+        diag2_array = [0 for i in range(2 * N)]
+
+        def nC2(x):
+            return 0.5 * x * (x - 1)
+
+
+        for i in range(N):
+            row_array[i] += sum(self.squareArray[i])
+
+            for j in range(N):
+                col_array[i] += self.squareArray[j][i]
+                diag1_array[i+j] += self.squareArray[i][j]
+                diag2_array[N-i+j] += self.squareArray[i][j]
+
+        sum_row_col = sum([nC2(row_array[i]) + nC2(col_array[i]) for i in range(N)])
+        sum_diag1_diag2 = sum([nC2(diag1_array[i]) + nC2(diag2_array[i]) for i in range(2 * N)])
+
+        return int(sum_diag1_diag2 + sum_row_col)
 
 if __name__ == "__main__":
     #Enable the following line to generate the same random numbers (useful for debugging)
