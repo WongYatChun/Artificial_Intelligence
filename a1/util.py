@@ -151,7 +151,7 @@ class PriorityQueue:
       of an item.  However, you may insert the same item multiple times with
       different priorities.
     """
-    def  __init__(self):
+    def __init__(self):
         self.heap = []
         self.count = 0
 

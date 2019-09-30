@@ -148,7 +148,49 @@ def breadthFirstSearch(problem):
 def uniformCostSearch(problem):
     "Search the node of least total cost first. "
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+
+    state = problem.getStartState()
+    cost = dict()
+    cost[state] = 0
+    pqueue = util.PriorityQueue()
+    pqueue.push(state, cost[state])
+    queue2 = util.Queue()
+    parent = dict()
+    visited = set()
+       
+
+    while not pqueue.isEmpty():
+        s = pqueue.pop()
+        if s not in visited:
+            # print(s)
+            visited.add(s)
+            # print(visited)
+
+            if problem.isGoalState(s):
+                goal = s
+                
+                while parent[goal][0] != state:
+                    
+                    queue2.push(parent[goal][1])
+                    goal = parent[goal][0]
+                    
+                queue2.push(parent[goal][1])
+                return queue2.list   
+
+
+            for next_state in problem.getSuccessors(s):
+                if next_state[0] not in visited:
+                    if cost.get(next_state[0], False) == False or cost[next_state[0]] > cost[s]+next_state[2]:
+                        # print("Has not visited: ",next_state[0])
+                        # print("Cost if available: ",cost.get(next_state[0], True))
+                        cost[next_state[0]] = cost[s]+next_state[2]
+                        pqueue.push(next_state[0], cost[next_state[0]])
+                        
+                        parent[next_state[0]] = (s, next_state[1])
+                    
+                            
+    return list()
+    
 
 def nullHeuristic(state, problem=None):
     """
@@ -160,7 +202,51 @@ def nullHeuristic(state, problem=None):
 def aStarSearch(problem, heuristic=nullHeuristic):
     "Search the node that has the lowest combined cost and heuristic first."
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    state = problem.getStartState()
+    bCost = dict()
+    bCost[state] = 0
+    aCost = dict()
+    aCost[state] = 0
+    pqueue = util.PriorityQueue()
+    pqueue.push(state, aCost[state])
+    queue2 = util.Queue()
+    parent = dict()
+    visited = set()
+       
+
+    while not pqueue.isEmpty():
+        s = pqueue.pop()
+        if s not in visited:
+            # print(s)
+            visited.add(s)
+            # print(visited)
+
+            if problem.isGoalState(s):
+                goal = s
+                
+                while parent[goal][0] != state:
+                    
+                    queue2.push(parent[goal][1])
+                    goal = parent[goal][0]
+                    
+                queue2.push(parent[goal][1])
+                return queue2.list   
+
+
+            for next_state in problem.getSuccessors(s):
+                if next_state[0] not in visited:
+                    
+                    if aCost.get(next_state[0], False) == False or aCost[next_state[0]] > bCost[s] + next_state[2] + heuristic(next_state[0], problem):
+                        # print("Has not visited: ",next_state[0]
+                        # print("Cost if available: ",cost.get(next_state[0], True))
+                        bCost[next_state[0]] = bCost[s]+next_state[2]
+                        aCost[next_state[0]] = bCost[next_state[0]] + heuristic(next_state[0], problem)
+                        pqueue.push(next_state[0], aCost[next_state[0]])
+                        
+                        parent[next_state[0]] = (s, next_state[1])
+                    
+                            
+    return list()
 
 # Abbreviations
 bfs = breadthFirstSearch
