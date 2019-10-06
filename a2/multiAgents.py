@@ -61,6 +61,26 @@ class ReflexAgent(Agent):
         newScaredTimes = [ghostState.scaredTimer for ghostState in newGhostStates]
 
         "*** YOUR CODE HERE ***"
+        # print(prevFood)
+        # print(successorGameState)
+        MAX = 999999
+        # print(newPos)
+        food_coord = [i for i in newFood.asList()]
+        if food_coord:
+          min_dist_food = min([manhattanDistance(newPos, i) for i in food_coord])
+        else:
+          return MAX
+        min_dist_ghost = min([manhattanDistance(newPos, i.getPosition()) for i in newGhostStates])
+        
+
+        if min_dist_food: 
+          if min_dist_ghost > 2 or (min(newScaredTimes) > 0 and len(newScaredTimes) == 1):
+            return successorGameState.getScore() + 1 / (min_dist_food) 
+          elif min_dist_ghost > 2:
+            return successorGameState.getScore() + 1 / (min_dist_food) + min_dist_ghost
+          else:
+            return successorGameState.getScore() + min_dist_ghost
+ 
         return successorGameState.getScore()
         
 
