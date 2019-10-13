@@ -137,10 +137,44 @@ class TicTacToeAgent():
         """ 
           You can initialize some variables here, but please do not modify the input parameters.
         """
-        {}
+        self.die = 0
+        
+    def getMax(self, gameState, currentDepth, gameRules, agentIndex): # only call for the pacman
+        values = [self.getValue(gameState.generateSuccessor(action), currentDepth, gameRules, agentIndex) for action in gameState.getLegalActions(gameRules)]
+        return max(values)
+
+    def getMin(self, gameState, currentDepth, gameRules, agentIndex): # only call for the ghost
+        
+        values = [self.getValue(gameState.generateSuccessor(action), currentDepth, gameRules, agentIndex) for action in gameState.getLegalActions(gameRules)]
+        return min(values)
+
+    def getValue(self, gameState, currentDepth, gameRules, agentIndex):
+        dead = sum([gameRules.deadTest(gameState.boards[i]) for i in range(3)])
+        if agentIndex % 2:# if the enermy
+            if dead - self.die:
+                return 9999
+            
+            return self.getMin(gameState, currentDepth, gameRules, agentIndex+1) # getMin
+        else: # if me
+            
+            if gameRules.isGameOver(gameState.boards):
+                return -9999
+            return self.getMax(gameState, currentDepth, gameRules, agentIndex+1) # getMax
 
     def getAction(self, gameState, gameRules):
-        util.raiseNotDefined()
+        "*** YOUR CODE HERE ***"
+        maxValue, maxAction = float("-inf"), gameState.getLegalActions(gameRules)[0]
+        initial_depth = 0
+        agentIndex = 0
+        for action in gameState.getLegalActions(gameRules):
+          # same logic as getMax, but we need to get the action this time
+            nextState = gameState.generateSuccessor(action)
+            nextValue = self.getValue(nextState, initial_depth, gameRules, agentIndex)
+            if nextValue > maxValue: 
+                maxValue, maxAction = nextValue, action
+                self.die = sum([gameRules.deadTest(nextState.boards[i]) for i in range(3)])
+        
+        return maxAction
 
 
 class randomAgent():
