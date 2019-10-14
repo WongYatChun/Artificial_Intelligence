@@ -92,7 +92,78 @@ class GameRules:
         """ 
           You can initialize some variables here, but please do not modify the input parameters.
         """
-        {}
+        self.fp_1 = [[True, False, False, False, False, False, False, False, False],
+                     [False, True, False, False, False, False, False, False, False],
+                     [True, True, True, False, False, False, False, False, False],
+                     [True, False, False, False, True, False, False, False, True],
+                     [True, False, False, False, False, True, False, True, False],
+                     [False, True, False, False, True, False, False, True, False],
+                     [True, True, True, True, False, False, False, False, False],
+                     [True, True, True, False, True, False, False, False, False],
+                     [True, True, True, False, False, False, True, False, False],
+                     [True, True, True, False, False, False, False, True, False],
+                     [True, True, False, False, True, False, False, True, False],
+                     [True, True, False, False, True, False, False, False, True],
+                     [True, False, True, False, True, False, True, False, False]]
+        
+        self.fp_a = [[True, False, False, False, False, False, False, False, True],
+                     [False, True, False, True, False, False, False, False , False],
+                     [False, True, False, False, False, False, False, True , False],
+                     [True, True, False, False, False, False, True, False, False],
+                     [True, False, True, False, True, False, False, False, False],
+                     [True, False, True, False, False, False, False, True, False],
+                     [True, False, False, False, True, True, False, False, False],
+                     [True, True, False, True, True, False, False, False, False],
+                     [True, True, False, True, False, True, False, False, False],
+                     [True, True, False, True, False, False, False, False, True],
+                     [True, True, False, False, False, False, False, True, True],
+                     [True, False, True, False, False, False, True, False, True],
+                     [False, True, False, True, False, True, False, True, False],
+                     [True, True, False, False, True, True, True, False, False],
+                     [True, True, False, False, False, True, True, True, False],
+                     [True, True, False, False, False, True, True, False, True],
+                     [True, True, False, True, False, True, False, True, True]]
+
+        self.fp_b = [[True, False, True, False, False, False, False, False, False],
+                     [True, False, False, False, True, False, False, False, False],
+                     [True, False, False, False, False, True, False, False, False],
+                     [False, True, False, False, True, False, False, False, False],
+                     [True, True, False, True, False, False, False, False, False],
+                     [False, True, False, True, False, True, False, False, False],
+                     [True, True, False, False, True, True, False, False, False],
+                     [True, True, False, False, True, False, True, False, False],
+                     [True, True, False, False, False, True, True, False, False],
+                     [True, True, False, False, False, False, True, True, False],
+                     [True, True, False, False, False, False, True, False, True],
+                     [True, False, True, False, True, False, False, True, False],
+                     [True, False, False, False, True, True, False, True, False],
+                     [True, True, False, True, False, True, False, True, False],
+                     [True, True, False, True, False, True, False, False, True]]
+        
+        self.fp_d = [[True, True, False, False, False, True, False, False, False],
+                     [True, True, False, False, False, False, False, True, False],
+                     [True, True, False, False, False, False, False, False, True]]
+
+        self.fp_ab = [[True, True, False, False, True, False, False, False, False],
+                      [True, False, True, False, False, False, True, False, False],
+                      [False, True, False, True, True, False, False, False, False],
+                      [True, True, False, False, False, True, False, True, False],
+                      [True, True, False, False, False, True, False, False, True]]
+        
+        self.fp_ad = [[True, True, False, False, False, False, False, False, False]]
+
+        
+        self.fp_c2 = [[False, False, False, False, True, False, False, False, False]]
+        
+    def rotate(self, board):
+        all_boards = [board]
+        temp = board
+        for i in range(3):
+            temp = [list(reversed(col)) for col in zip(*temp)]
+            all_boards.append(temp)
+        return all_boards
+    
+    ## TODO: mirroring - H, V, D1, D2
         
     def deadTest(self, board):
         """
@@ -111,6 +182,19 @@ class GameRules:
             if board[i] and board[i+3] and board[i+6]:
                 return True
         return False
+
+    def fingerprint(self, board):
+        if sum(board) == 0:
+            return {'c':1}
+        elif self.deadTest(board):
+            return {'1':1}
+
+       
+
+        
+        
+        
+        
 
     def isGameOver(self, boards):
         """
@@ -137,29 +221,13 @@ class TicTacToeAgent():
         """ 
           You can initialize some variables here, but please do not modify the input parameters.
         """
-        self.die = 0
         
-    def getMax(self, gameState, currentDepth, gameRules, agentIndex): # only call for the pacman
-        values = [self.getValue(gameState.generateSuccessor(action), currentDepth, gameRules, agentIndex) for action in gameState.getLegalActions(gameRules)]
-        return max(values)
 
-    def getMin(self, gameState, currentDepth, gameRules, agentIndex): # only call for the ghost
+
+    def getValue(self, gameState, currentDepth, gameRules):
         
-        values = [self.getValue(gameState.generateSuccessor(action), currentDepth, gameRules, agentIndex) for action in gameState.getLegalActions(gameRules)]
-        return min(values)
+            
 
-    def getValue(self, gameState, currentDepth, gameRules, agentIndex):
-        dead = sum([gameRules.deadTest(gameState.boards[i]) for i in range(3)])
-        if agentIndex % 2:# if the enermy
-            if dead - self.die:
-                return 9999
-            
-            return self.getMin(gameState, currentDepth, gameRules, agentIndex+1) # getMin
-        else: # if me
-            
-            if gameRules.isGameOver(gameState.boards):
-                return -9999
-            return self.getMax(gameState, currentDepth, gameRules, agentIndex+1) # getMax
 
     def getAction(self, gameState, gameRules):
         "*** YOUR CODE HERE ***"
@@ -169,10 +237,10 @@ class TicTacToeAgent():
         for action in gameState.getLegalActions(gameRules):
           # same logic as getMax, but we need to get the action this time
             nextState = gameState.generateSuccessor(action)
-            nextValue = self.getValue(nextState, initial_depth, gameRules, agentIndex)
+            nextValue = self.getValue(nextState, initial_depth, gameRules)
             if nextValue > maxValue: 
                 maxValue, maxAction = nextValue, action
-                self.die = sum([gameRules.deadTest(nextState.boards[i]) for i in range(3)])
+                
         
         return maxAction
 
