@@ -104,7 +104,8 @@ class GameRules:
                      [True, True, True, False, False, False, False, True, False],
                      [True, True, False, False, True, False, False, True, False],
                      [True, True, False, False, True, False, False, False, True],
-                     [True, False, True, False, True, False, True, False, False]]
+                     [True, False, True, False, True, False, True, False, False]
+                    ]
         
         self.fp_a = [[True, False, False, False, False, False, False, False, True],
                      [False, True, False, True, False, False, False, False , False],
@@ -155,16 +156,95 @@ class GameRules:
         
         self.fp_c2 = [[False, False, False, False, True, False, False, False, False]]
         
-    def rotate(self, board):
-        all_boards = [board]
-        temp = board
-        for i in range(3):
-            temp = [list(reversed(col)) for col in zip(*temp)]
-            all_boards.append(temp)
-        return all_boards
     
-    ## TODO: mirroring - H, V, D1, D2
+        self.fp = self.fp_1 + self.fp_a + self.fp_ab + self.fp_ad + self.fp_b + self.fp_c2 + self.fp_d
+
+        self.fp_1_all = self.transform(self.fp_1)
+        self.fp_a_all = self.transform(self.fp_a)
+        self.fp_b_all = self.transform(self.fp_b)
+        self.fp_d_all = self.transform(self.fp_d)
+        self.fp_ab_all = self.transform(self.fp_ab)
+        self.fp_ad_all = self.transform(self.fp_ad)
+        self.fp_c2_all = self.transform(self.fp_c2)
+
+    
+    def transform(self, boards):
         
+        
+        # print(boards)
+        all_boards = boards.copy()
+        # print(all_boards)
+        for board in boards:
+            tmp = board.copy()
+            for _ in range(3):
+                tmp = self.rot90(tmp)
+                # print(tmp)
+                all_boards.append(tmp)
+                # print(all_boards)
+                
+            all_boards.append(self.v_mirror(board)) 
+            all_boards.append(self.h_mirror(board))
+            all_boards.append(self.diag1_mirror(board))
+            all_boards.append(self.diag2_mirror(board))
+            # print(all_boards)
+
+        return all_boards
+            
+    def rot90(self, board):
+        tmp = board.copy()
+        tmp[0] = board[6]
+        tmp[1] = board[3]
+        tmp[2] = board[0]
+        tmp[3] = board[7]
+        tmp[5] = board[1]
+        tmp[6] = board[8]
+        tmp[7] = board[5]
+        tmp[8] = board[2]
+
+        return tmp
+
+
+    def v_mirror(self, board):
+        temp = board.copy()
+        temp[0] = board[2]
+        temp[2] = board[0]
+        temp[3] = board[5]
+        temp[5] = board[3]
+        temp[6] = board[8]
+        temp[8] = board[6]
+        return temp
+        
+
+    def h_mirror(self, board):
+        temp = board.copy()
+        temp[0] = board[6]
+        temp[6] = board[0]
+        temp[1] = board[7]
+        temp[7] = board[1]
+        temp[2] = board[8]
+        temp[8] = board[2]
+        return temp
+
+    def diag1_mirror(self, board):
+        temp = board.copy()
+        temp[1] = board[3]
+        temp[3] = board[1]
+        temp[2] = board[6]
+        temp[6] = board[2]
+        temp[7] = board[5]
+        temp[5] = board[7]
+        return temp
+    
+    def diag2_mirror(self, board):
+        temp = board.copy()
+        temp[0] = board[8]
+        temp[8] = board[0]
+        temp[1] = board[5]
+        temp[5] = board[1]
+        temp[7] = board[3]
+        temp[3] = board[7]
+        return temp
+
     def deadTest(self, board):
         """
           Check whether a board is a dead board
@@ -183,17 +263,61 @@ class GameRules:
                 return True
         return False
 
-    def fingerprint(self, board):
+    def get_fp(self, board):
+
+
         if sum(board) == 0:
             return {'c':1}
+        
         elif self.deadTest(board):
             return {'1':1}
 
-       
+        elif board in self.fp_1_all:
+            return {'1':1}
+        
+        elif board in self.fp_a_all:
+            return {'a':1}
 
+        elif board in self.fp_b_all:
+            return {'b':1}
         
+        elif board in self.fp_d_all:
+            return {'d':1}
         
+        elif board in self.fp_ab_all:
+            return {'a':1,'b':1}
+
+        elif board in self.fp_ad_all:
+            return {'a':1,'d':1}
+
+        elif board in self.fp_c2_all:
+            return {'c':2,}
+        else:
+
+            return False
         
+    def fpMath(self, boards):
+        """
+        This section is inspired by kelvin0815
+        https://github.com/kelvin0815/notakto/blob/master/solveTicTacToe.py
+        """
+        fps = [self.get_fp(board) for board in boards]
+
+        result = {}
+        # print(fps)
+        for fp in fps:
+            # print(fp)
+            for sym in fp:
+                if sym not in result.keys():
+                    result[sym] = fp[sym]
+                else:
+                    result[sym] += fp[sym]
+
+        if '1' in result.keys():
+            if result.keys() == ['1']: return {'1':1}
+            else: del result['1']
+        
+        return result  
         
 
     def isGameOver(self, boards):
@@ -224,9 +348,19 @@ class TicTacToeAgent():
         
 
 
-    def getValue(self, gameState, currentDepth, gameRules):
+    def getValue(self, gameState, gameRules):
         
-            
+        MAX = 999
+        
+        winners = [{"a":1}, {"b":2}, {"c":2}, {"b":1, "c":1}]
+
+        result = gameRules.fpMath(gameState.boards)
+
+        if result in winners:
+            if result == {"c":2}:return MAX + MAX
+            return MAX
+
+        return 0
 
 
     def getAction(self, gameState, gameRules):
@@ -237,7 +371,7 @@ class TicTacToeAgent():
         for action in gameState.getLegalActions(gameRules):
           # same logic as getMax, but we need to get the action this time
             nextState = gameState.generateSuccessor(action)
-            nextValue = self.getValue(nextState, initial_depth, gameRules)
+            nextValue = self.getValue(nextState, gameRules)
             if nextValue > maxValue: 
                 maxValue, maxAction = nextValue, action
                 
